@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DemPassword - The Ultimate Password Challenge</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 650px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.8rem;
+            margin-bottom: 5px;
+            color: #fdbb2d;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-style: italic;
+            margin-bottom: 25px;
+            color: #ccc;
+        }
+        
+        .password-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        #password {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        #password:focus {
+            outline: none;
+            border-color: #fdbb2d;
+            box-shadow: 0 0 15px rgba(253, 187, 45, 0.7);
+        }
+        
+        .strength-meter {
+            height: 12px;
+            width: 100%;
+            background: #444;
+            border-radius: 6px;
+            margin: 15px 0 20px;
+            overflow: hidden;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #ff4b2b, #ff416c, #fdbb2d, #4cd964);
+            border-radius: 6px;
+            transition: width 0.5s;
+        }
+        
+        .rules-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-top: 20px;
+        }
+        
+        .rules-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .rules-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .rules-container::-webkit-scrollbar-thumb {
+            background: #fdbb2d;
+            border-radius: 4px;
+        }
+        
+        .rule {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .rule.satisfied {
+            background: rgba(46, 204, 113, 0.2);
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+        }
+        
+        .rule-icon {
+            margin-right: 12px;
+            font-size: 1.4rem;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .rule-text {
+            flex: 1;
+            font-size: 1rem;
+        }
+        
+        .level-indicator {
+            text-align: center;
+            font-size: 1.3rem;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #fdbb2d;
+        }
+        
+        .success {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #fdbb2d;
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        .emoji {
+            font-size: 2.2rem;
+            margin: 0 8px;
+            vertical-align: middle;
+        }
+        
+        .hint {
+            font-size: 0.95rem;
+            color: #ccc;
+            font-style: italic;
+            margin-top: 8px;
+            padding-left: 42px;
+        }
+        
+        .password-requirements {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .timer {
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 15px 0;
+            color: #fdbb2d;
+            font-weight: bold;
+        }
+        
+        .difficulty {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .difficulty-btn {
+            padding: 8px 16px;
+            margin: 0 10px;
+            background: rgba(253, 187, 45, 0.3);
+            border: 2px solid #fdbb2d;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .difficulty-btn.active {
+            background: #fdbb2d;
+            color: #1a2a6c;
+            font-weight: bold;
+        }
+        
+        .rule-number {
+            font-weight: bold;
+            color: #fdbb2d;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DemPassword</h1>
+        <p class="subtitle">The ultimate password challenge with 15 progressively difficult rules</p>
+        
+        <div class="difficulty">
+            <button class="difficulty-btn active" id="easyBtn">Easy (5 rules)</button>
+            <button class="difficulty-btn" id="mediumBtn">Medium (10 rules)</button>
+            <button class="difficulty-btn" id="hardBtn">Hard (15 rules)</button>
+        </div>
+        
+        <div class="password-container">
+            <input type="text" id="password" placeholder="Start typing your password..." autocomplete="off">
+            <div class="strength-meter">
+                <div class="strength-fill" id="strengthFill"></div>
+            </div>
+        </div>
+        
+        <div class="level-indicator">
+            Rules satisfied: <span id="rulesCompleted">0</span>/<span id="totalRules">15</span>
+        </div>
+        
+        <div class="timer">
+            Time: <span id="timer">00:00</span>
+        </div>
+        
+        <div class="rules-container">
+            <div class="rule" id="rule1">
+                <span class="rule-icon">🔒</span>
+                <span class="rule-text"><span class="rule-number">1.</span> Must be at least 8 characters long</span>
+            </div>
+            <div class="rule" id="rule2">
+                <span class="rule-icon">🔢</span>
+                <span class="rule-text"><span class="rule-number">2.</span> Must contain at least 2 numbers</span>
+            </div>
+            <div class="rule" id="rule3">
+                <span class="rule-icon">⚡</span>
+                <span class="rule-text"><span class="rule-number">3.</span> Must contain at least one special character (!@#$%^&*)</span>
+            </div>
+            <div class="rule" id="rule4">
+                <span class="rule-icon">🌙</span>
+                <span class="rule-text"><span class="rule-number">4.</span> Must contain the word "moon"</span>
+            </div>
+            <div class="rule" id="rule5">
+                <span class="rule-icon">🎯</span>
+                <span class="rule-text"><span class="rule-number">5.</span> The digits in your password must add up to 25</span>
+            </div>
+            <div class="rule" id="rule6">
+                <span class="rule-icon">⬆️</span>
+                <span class="rule-text"><span class="rule-number">6.</span> Must contain at least one uppercase letter</span>
+            </div>
+            <div class="rule" id="rule7">
+                <span class="rule-icon">🔍</span>
+                <span class="rule-text"><span class="rule-number">7.</span> Must contain a palindrome of at least 3 characters</span>
+            </div>
+            <div class="rule" id="rule8">
+                <span class="rule-icon">🔢</span>
+                <span class="rule-text"><span class="rule-number">8.</span> Must contain a prime number</span>
+            </div>
+            <div class="rule" id="rule9">
+                <span class="rule-icon">🧮</span>
+                <span class="rule-text"><span class="rule-number">9.</span> The product of all digits must be divisible by 10</span>
+            </div>
+            <div class="rule" id="rule10">
+                <span class="rule-icon">🌍</span>
+                <span class="rule-text"><span class="rule-number">10.</span> Must contain the name of a country</span>
+            </div>
+            <div class="rule" id="rule11">
+                <span class="rule-icon">⭐</span>
+                <span class="rule-text"><span class="rule-number">11.</span> Must contain a star emoji (⭐, 🌟, ✨)</span>
+            </div>
+            <div class="rule" id="rule12">
+                <span class="rule-icon">📅</span>
+                <span class="rule-text"><span class="rule-number">12.</span> Must contain today's day of the month</span>
+            </div>
+            <div class="rule" id="rule13">
+                <span class="rule-icon">🎲</span>
+                <span class="rule-text"><span class="rule-number">13.</span> Must contain a dice roll total (e.g., 2d6=7)</span>
+            </div>
+            <div class="rule" id="rule14">
+                <span class="rule-icon">🔀</span>
+                <span class="rule-text"><span class="rule-number">14.</span> Must have alternating vowel and consonant pattern for at least 6 characters</span>
+            </div>
+            <div class="rule" id="rule15">
+                <span class="rule-icon">🧩</span>
+                <span class="rule-text"><span class="rule-number">15.</span> Must contain the solution to a simple equation (e.g., 5*3=15)</span>
+            </div>
+        </div>
+        
+        <div class="success" id="successMessage">
+            <span class="emoji">🎉</span> Congratulations! You've created a valid DemPassword! <span class="emoji">🎉</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const strengthFill = document.getElementById('strengthFill');
+            const rulesCompletedElement = document.getElementById('rulesCompleted');
+            const totalRulesElement = document.getElementById('totalRules');
+            const successMessage = document.getElementById('successMessage');
+            const timerElement = document.getElementById('timer');
+            const easyBtn = document.getElementById('easyBtn');
+            const mediumBtn = document.getElementById('mediumBtn');
+            const hardBtn = document.getElementById('hardBtn');
+            
+            const rules = document.querySelectorAll('.rule');
+            const totalRules = rules.length;
+            let activeRules = totalRules;
+            let startTime = Date.now();
+            let timerInterval = null;
+            
+            // Countries list for rule 10
+            const countries = ["usa", "canada", "mexico", "brazil", "france", "germany", "italy", "spain", "japan", "china", "india", "australia", "russia", "egypt", "kenya"];
+            
+            // Prime numbers for rule 8
+            const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+            
+            // Set total rules
+            totalRulesElement.textContent = totalRules;
+            
+            // Start timer
+            function startTimer() {
+                startTime = Date.now();
+                if (timerInterval) clearInterval(timerInterval);
+                
+                timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const seconds = (elapsed % 60).toString().padStart(2, '0');
+                    timerElement.textContent = `${minutes}:${seconds}`;
+                }, 1000);
+            }
+            
+            // Set difficulty
+            function setDifficulty(level) {
+                easyBtn.classList.remove('active');
+                mediumBtn.classList.remove('active');
+                hardBtn.classList.remove('active');
+                
+                if (level === 'easy') {
+                    easyBtn.classList.add('active');
+                    activeRules = 5;
+                } else if (level === 'medium') {
+                    mediumBtn.classList.add('active');
+                    activeRules = 10;
+                } else {
+                    hardBtn.classList.add('active');
+                    activeRules = 15;
+                }
+                
+                totalRulesElement.textContent = activeRules;
+                validatePassword();
+            }
+            
+            // Event listeners
+            passwordInput.addEventListener('input', validatePassword);
+            easyBtn.addEventListener('click', () => setDifficulty('easy'));
+            mediumBtn.addEventListener('click', () => setDifficulty('medium'));
+            hardBtn.addEventListener('click', () => setDifficulty('hard'));
+            
+            // Start timer on first input
+            let timerStarted = false;
+            passwordInput.addEventListener('input', () => {
+                if (!timerStarted && passwordInput.value.length > 0) {
+                    startTimer();
+                    timerStarted = true;
+                }
+            });
+            
+            function validatePassword() {
+                const password = passwordInput.value;
+                let completedRules = 0;
+                
+                // Rule 1: At least 8 characters
+                if (password.length >= 8) {
+                    rules[0].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[0].classList.remove('satisfied');
+                }
+                
+                // Rule 2: At least 2 numbers
+                const digitCount = (password.match(/\d/g) || []).length;
+                if (digitCount >= 2) {
+                    rules[1].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[1].classList.remove('satisfied');
+                }
+                
+                // Rule 3: At least one special character
+                const specialCharCount = (password.match(/[!@#$%^&*]/g) || []).length;
+                if (specialCharCount >= 1) {
+                    rules[2].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[2].classList.remove('satisfied');
+                }
+                
+                // Rule 4: Contains the word "moon"
+                if (password.toLowerCase().includes('moon')) {
+                    rules[3].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[3].classList.remove('satisfied');
+                }
+                
+                // Rule 5: Digits add up to 25
+                const digits = password.match(/\d/g) || [];
+                let sum = 0;
+                digits.forEach(digit => {
+                    sum += parseInt(digit);
+                });
+                if (sum === 25) {
+                    rules[4].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[4].classList.remove('satisfied');
+                }
+                
+                // Rule 6: At least one uppercase letter
+                if (/[A-Z]/.test(password)) {
+                    rules[5].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[5].classList.remove('satisfied');
+                }
+                
+                // Rule 7: Contains a palindrome of at least 3 characters
+                let hasPalindrome = false;
+                for (let i = 0; i <= password.length - 3; i++) {
+                    const substr = password.substring(i, i + 3);
+                    if (substr === substr.split('').reverse().join('')) {
+                        hasPalindrome = true;
+                        break;
+                    }
+                }
+                if (hasPalindrome) {
+                    rules[6].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[6].classList.remove('satisfied');
+                }
+                
+                // Rule 8: Contains a prime number
+                let hasPrime = false;
+                for (const prime of primes) {
+                    if (password.includes(prime.toString())) {
+                        hasPrime = true;
+                        break;
+                    }
+                }
+                if (hasPrime) {
+                    rules[7].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[7].classList.remove('satisfied');
+                }
+                
+                // Rule 9: Product of all digits divisible by 10
+                const allDigits = password.match(/\d/g) || [];
+                let product = 1;
+                allDigits.forEach(digit => {
+                    product *= parseInt(digit);
+                });
+                if (product % 10 === 0 && allDigits.length > 0) {
+                    rules[8].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[8].classList.remove('satisfied');
+                }
+                
+                // Rule 10: Contains a country name
+                let hasCountry = false;
+                for (const country of countries) {
+                    if (password.toLowerCase().includes(country)) {
+                        hasCountry = true;
+                        break;
+                    }
+                }
+                if (hasCountry) {
+                    rules[9].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[9].classList.remove('satisfied');
+                }
+                
+                // Rule 11: Contains a star emoji
+                if (password.includes('⭐') || password.includes('🌟') || password.includes('✨')) {
+                    rules[10].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[10].classList.remove('satisfied');
+                }
+                
+                // Rule 12: Contains today's day of the month
+                const today = new Date().getDate().toString();
+                if (password.includes(today)) {
+                    rules[11].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[11].classList.remove('satisfied');
+                }
+                
+                // Rule 13: Contains a dice roll total (e.g., 2d6=7)
+                if (/\d+d\d+=\d+/.test(password)) {
+                    rules[12].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[12].classList.remove('satisfied');
+                }
+                
+                // Rule 14: Alternating vowel and consonant pattern for at least 6 characters
+                const vowels = 'aeiouAEIOU';
+                let patternCount = 0;
+                let hasPattern = false;
+                
+                for (let i = 0; i < password.length - 1; i++) {
+                    const isVowel1 = vowels.includes(password[i]);
+                    const isVowel2 = vowels.includes(password[i+1]);
+                    
+                    if ((isVowel1 && !isVowel2) || (!isVowel1 && isVowel2)) {
+                        patternCount++;
+                        if (patternCount >= 5) {
+                            hasPattern = true;
+                            break;
+                        }
+                    } else {
+                        patternCount = 0;
+                    }
+                }
+                
+                if (hasPattern) {
+                    rules[13].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[13].classList.remove('satisfied');
+                }
+                
+                // Rule 15: Contains the solution to a simple equation
+                if (/\d+[\+\-\*\/]\d+=\d+/.test(password)) {
+                    rules[14].classList.add('satisfied');
+                    completedRules++;
+                } else {
+                    rules[14].classList.remove('satisfied');
+                }
+                
+                // Update UI based on active rules
+                for (let i = 0; i < rules.length; i++) {
+                    if (i < activeRules) {
+                        rules[i].style.display = 'flex';
+                    } else {
+                        rules[i].style.display = 'none';
+                        rules[i].classList.remove('satisfied');
+                    }
+                }
+                
+                // Update UI
+                rulesCompletedElement.textContent = Math.min(completedRules, activeRules);
+                
+                // Update strength meter
+                const strength = (Math.min(completedRules, activeRules) / activeRules) * 100;
+                strengthFill.style.width = `${strength}%`;
+                
+                // Check if all rules are satisfied
+                if (completedRules >= activeRules) {
+                    successMessage.style.display = 'block';
+                    passwordInput.disabled = true;
+                    if (timerInterval) clearInterval(timerInterval);
+                } else {
+                    successMessage.style.display = 'none';
+                    passwordInput.disabled = false;
+                }
+            }
+            
+            // Initial validation
+            setDifficulty('hard');
+        });
+    </script>
+</body>
+</html>
